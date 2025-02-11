@@ -1,0 +1,14 @@
+body {
+    margin: 0px auto;
+    font-family: sans-serif;
+    vertical-align: middle;
+    margin-left: 40%;
+    margin-right: 40%;
+    align-items: center;
+}
+table {
+    border: 1px solid black;
+}
+td {
+    border: 1px solid black;
+}
