@@ -13,12 +13,17 @@
         <table>
             <tr>
                 <th>Task</th>
+                <th>Due</th>
                 <th>Added</th>
                 <th>Actions</th>
             </tr>
             {% for task in tasks %}
                 <tr>
-                    <td>{{ task.content }}</td>
+                    {% for i in task.name %}
+                        <td>{{ i }}</td>
+                    {% endfor %}
+                    <td>{{ task.name }}</td>
+                    <td>{{ task.dueDate }}</td>
                     <td>{{ task.date_created.date() }}</td>
                     <td>
                         <a href="/delete/{{ task.id }}">Delete</a>
@@ -31,7 +36,22 @@
     {% endif %}
 
     <form action="/" method="POST">
-        <input type="text" name="content" id="content">
+        <h4>Assignment/Project Name:</h4>
+        <input type="text" name="name" id="name">
+        <h4>Due Date:</h4>
+        <input type="date" name="dueDate" id="dueDate">
+        <h4>Time Due:</h4>
+        <input type="text" name="dueTime" id="dueTime" value="HH:MM:SS">
+        <h4>Are You Willing to Work on the Weekend?</h4>
+        <input type="checkbox" name="weekends" id="weekends">
+        <h4>How Many Hours Will This Task Take?</h4>
+        <input type="text" name="timeToDo" id="timeToDo">
+        <h4>How Many Days Do You Want to Work:</h4>
+        <input type="text" name="workDays" id="workDays">
+        <h4>Average Amount of Hours Available to Work Daily:</h4>
+        <input type="text" name="workTime" id="workTime" value="HH">
+        <br>
+        <br>
         <input type="submit" value="Add Task">
     </form>
 </div>
