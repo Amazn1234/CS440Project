@@ -10,6 +10,13 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///todo.db"
 # initialize db
 db = SQLAlchemy(app)
 
+class Week:
+    days = { "sunday": 0, "monday": 0, "tuesday": 0, "wednesday": 0, "thursday": 0, "friday": 0, "saturday": 0 }
+
+# planner
+planner = []
+planner.append(Week)
+
 class Todo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
@@ -19,7 +26,7 @@ class Todo(db.Model):
     weekends = db.Column(db.Boolean, nullable=False)
     workTime = db.Column(db.DateTime, nullable=False)
     schedule = db.Column(db.String(50))
-    date_created = db.Column(db.DateTime, default=datetime.utcnow)
+    date_created = db.Column(db.DateTime, default=datetime.now)
 
     def __repr__(self):
         return '<Task %r>' % self.id
@@ -51,12 +58,13 @@ def index():
         # set checkbox response as boolean
         try:
             task_weekends = request.form['weekends']
+            task_weekends = True
         # if checkbox not found, means user did not check yes, set False
         except:
             task_weekends = False
-
-        task_timeToDo = request.form['timeToDo']
-
+        
+        task_timeToDo = int(request.form['timeToDo'])
+        
         # get the days of the week to work
         try:
             task_workDays = int(request.form['workDays'])
@@ -80,12 +88,14 @@ def index():
         except:
             return redirect('/')
         
-        task_schedule = calenderPlanner(task_dueDate, task_workDays, task_weekends, task_timeToDo, task_workTime, Todo)
-
+        task_schedule = calenderPlanner(task_dueDate, task_workDays, task_weekends, task_timeToDo, task_workTime, planner)
+        for i in planner:
+            for j in i.days:
+                print(j + "- " + str(i.days[j]))
         # create new task
         new_task = Todo(name=task_name, dueDate=task_dueDate, workDays=task_workDays, timeToDo=task_timeToDo,
                          weekends=task_weekends, workTime=task_workTime, schedule=task_schedule)
-
+        
         # add task to db and commit, then redirect to main page
         try:
             db.session.add(new_task)
@@ -100,7 +110,7 @@ def index():
         # query database for all tasks
         tasks = Todo.query.order_by(Todo.date_created).all()
         # show the main page
-        return render_template("index.html", tasks=tasks)
+        return render_template("index.html", tasks=tasks, planner=planner)
 
 # deletion route, will be expecting a task id
 @app.route('/delete/<int:id>')

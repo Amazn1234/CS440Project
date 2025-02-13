@@ -19,9 +19,6 @@
             </tr>
             {% for task in tasks %}
                 <tr>
-                    {% for i in task.name %}
-                        <td>{{ i }}</td>
-                    {% endfor %}
                     <td>{{ task.name }}</td>
                     <td>{{ task.dueDate }}</td>
                     <td>{{ task.date_created.date() }}</td>
@@ -31,6 +28,14 @@
                         <a href="/update/{{ task.id }}">Update</a>
                     </td>
                 </tr>
+                {% for week in planner %}
+                    <tr>
+                        {% for day in week.days %}
+                            <th>{{ day }}</th>
+                            <td>{{ week.days[day] }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
             {% endfor %}
         </table>
     {% endif %}
