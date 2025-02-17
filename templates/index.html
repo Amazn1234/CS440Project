@@ -28,15 +28,16 @@
                         <a href="/update/{{ task.id }}">Update</a>
                     </td>
                 </tr>
-                {% for week in planner %}
-                    <tr>
-                        {% for day in week.days %}
-                            <th>{{ day }}</th>
-                            <td>{{ week.days[day] }}</td>
-                        {% endfor %}
-                    </tr>
-                {% endfor %}
             {% endfor %}
+            {% for week in planner %}
+                <tr>
+                    {% for day in week.days %}
+                        <th>{{ day }}</th>
+                        <td>{{ week.days[day] }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+            
         </table>
     {% endif %}
 
@@ -51,7 +52,7 @@
         <input type="checkbox" name="weekends" id="weekends">
         <h4>How Many Hours Will This Task Take?</h4>
         <input type="text" name="timeToDo" id="timeToDo">
-        <h4>How Many Days Do You Want to Work:</h4>
+        <h4>How Many Days Do You Want to Work per Week?</h4>
         <input type="text" name="workDays" id="workDays">
         <h4>Average Amount of Hours Available to Work Daily:</h4>
         <input type="text" name="workTime" id="workTime" value="HH">
