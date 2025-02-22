@@ -1,14 +1,17 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 
+# week and it's days class
 class Week:
     days = { "sunday": 0, "monday": 0, "tuesday": 0, "wednesday": 0, "thursday": 0, "friday": 0, "saturday": 0 }
 
-def calenderPlanner(dueDateTime, workDays, weekendWork, workHours, freeHours, planner):
+def calendarPlanner(dueDateTime, workDays, weekendWork, workHours, freeHours, planner):
+    # divide the estimated work hours by the days able to work
     maxHoursPerDay = workHours / (int((dueDateTime - datetime.now()).days) + 1)
-    print(int((dueDateTime - datetime.now()).days))
+    # variables that may be used if we implement checking the planner for full days or something like it
     schedList = ""
     weekList = []
+    # initialize week count, used in case of tasks that span multiple weeks
     weekNumber = 0
 
     #for week in planner:
@@ -38,11 +41,12 @@ def calenderPlanner(dueDateTime, workDays, weekendWork, workHours, freeHours, pl
     #        case "Sa":
     #            weekList[weekNumber].days["saturday"] += hours
     
+    # get today- currentDay will hold the day as we increment through the days
     currentDay = datetime.now()
+    # for days in between now and due date day
     for dayIndex in range(int((dueDateTime - datetime.now()).days) + 1):
-        tempDay = currentDay
-
-        match (tempDay.weekday()):
+        # get the day of the week, add the time to the day
+        match (currentDay.weekday()):
             case 0:
                 planner[weekNumber].days["monday"] += maxHoursPerDay
             case 1:
@@ -58,9 +62,11 @@ def calenderPlanner(dueDateTime, workDays, weekendWork, workHours, freeHours, pl
             case 6:
                 planner[weekNumber].days["sunday"] += maxHoursPerDay
 
-        if (tempDay.weekday()) == 5:
+        # if a new week is coming, change weeks and add a week to planner if needed
+        if (currentDay.weekday()) == 5:
             weekNumber += 1
             if len(planner) < weekNumber + 1:
                 planner.append(Week)
                 
+        # add a day to currentDay
         currentDay += timedelta(days=1)

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, flash
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from planner import *
@@ -38,21 +38,23 @@ with app.app_context():
 # allow post and get for user i/o
 @app.route('/', methods=['POST', 'GET'])
 def index():
+    errors = []
     # if request is POST
     if request.method == 'POST':
         # get contents of html's post form
         # get name of assignment/project
         task_name = request.form['name']
 
-        # get due date and time
-        task_dueDate = request.form['dueDate']
-        task_dueTime = request.form['dueTime']
-        # turn into a datetime object
         try:
+            # get due date and time
+            task_dueDate = request.form['dueDate']
+            task_dueTime = request.form['dueTime']
+            # turn into a datetime object
             task_dueDate = datetime.strptime(task_dueDate + " " + task_dueTime, "%Y-%m-%d %H:%M:%S")
         # if failure to do so, restart form
         except:
-            return redirect('/')
+            errors.append("Error: Invalid date or time")
+            return render_template("index.html", errors=errors)
         
         # get if user is willing to work weekends
         # set checkbox response as boolean
@@ -70,14 +72,17 @@ def index():
             task_workDays = int(request.form['workDays'])
             # check if valid amount of days- if not, restart form
             if task_weekends:
-                if task_workDays > 7:
-                    return redirect('/')
+                if task_workDays > 7 or task_workDays <= 0:
+                    errors.append("Error: Please enter an amount of days 1-7")
+                    return render_template("index.html", errors=errors)
             else:
-                if task_workDays > 5:
-                    return redirect('/')
+                if task_workDays > 5 or task_workDays <= 0:
+                    errors.append("Error: Please enter an amount of days 1-5")
+                    return render_template("index.html", errors=errors)
         # if not an int, restart form
         except:
-            return redirect('/')
+            errors.append("Error: Please enter an integer")
+            return render_template("index.html", errors=errors)
         
         # get how much time user can work per day
         task_workTime = request.form['workTime']
@@ -86,9 +91,10 @@ def index():
             task_workTime = datetime.strptime(task_workTime, "%H")
         # if failure to do so, restart form
         except:
-            return redirect('/')
+            errors.append("Error: Please enter a valid 2-digit hour amount")
+            return render_template("index.html", errors=errors)
         
-        task_schedule = calenderPlanner(task_dueDate, task_workDays, task_weekends, task_timeToDo, task_workTime, planner)
+        task_schedule = calendarPlanner(task_dueDate, task_workDays, task_weekends, task_timeToDo, task_workTime, planner)
         for i in planner:
             for j in i.days:
                 print(j + "- " + str(i.days[j]))
@@ -118,12 +124,9 @@ def delete(id):
     # get task by id, or 404
     task_to_delete = Todo.query.get_or_404(id)
 
-    try:
-        db.session.delete(task_to_delete)
-        db.session.commit()
-        return redirect('/')
-    except:
-        return "There was an error deleting that task."
+    db.session.delete(task_to_delete)
+    db.session.commit()
+    return redirect('/')
     
 # updating route, will be expecting a task id
 @app.route('/update/<int:id>', methods=['GET', 'POST'])
