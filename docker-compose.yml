@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+  api_gateway:
+    build: ./api_gateway
+    ports:
+      - "5000:5000" #verify correct port numbers "to:from" format
+    depends_on:
+      - planner_service
+      - database_service
+    networks:
+     - backend
+
+  planner_service:
+    build: ./planner_service
+    ports:
+      - "5001:5001" #verify correct port numbers
+
+  database_service:
+    build: ./database_service
+    ports:
+      - "5002:5002" #verify correct port numbers
+    volumes:
+     -db_data:/app/instance
+    networks:
+      - backend
+volumes:
+  -db_data
+
+networks:
+  backend:

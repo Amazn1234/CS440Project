@@ -8,7 +8,7 @@ class Week:
 def calendarPlanner(dueDateTime, workDays, weekendWork, workHours, freeHours, planner):
     # divide the estimated work hours by the days able to work
     maxHoursPerDay = workHours / (int((dueDateTime - datetime.now()).days) + 1)
-    # variables that may be used if we implement checking the planner for full days or something like it
+    # variables that may be used if we implement checking the planner for full days or something similar
     schedList = ""
     weekList = []
     # initialize week count, used in case of tasks that span multiple weeks
