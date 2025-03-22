@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   api_gateway:
-    build: ./api_gateway
+    build: ./api_gateway/api_gateway.py
     ports:
       - "5000:5000" #verify correct port numbers "to:from" format
     depends_on:
@@ -12,12 +12,12 @@ services:
      - backend
 
   planner_service:
-    build: ./planner_service
+    build: ./planner_service/planner_service.py
     ports:
       - "5001:5001" #verify correct port numbers
 
   database_service:
-    build: ./database_service
+    build: ./database_service/database_service.py
     ports:
       - "5002:5002" #verify correct port numbers
     volumes:

@@ -30,10 +30,12 @@ def add_task():
         "workTime": request.form['workTime']
     }
 
+    #verify required files are filled in
+
     # call planner service to gen a schedule
     try:
         schedule_response = requests.post(f"{PLANNER_SERVICE_URL}/schedule", json=task_data)
-        task_data["schedule"] = schedule_response.son()["schedule"]
+        task_data["schedule"] = schedule_response.json()["schedule"]
     except requests.exceptions.RequestException:
         task_data["schedule"] = "Error getting schedule"
 
@@ -49,6 +51,57 @@ def delete_task(id):
     # delete a task, link to db service
     requests.delete(f"{DATABASE_SERVICE_URL}/tasks/{id}")
     return redirect('/')
+
+@app.route('/update/<int:id>', methods=['POST'])
+def update_task(id):
+    """
+    Endpoint to update a task.
+    This will send the update request to the planner service
+    and to the database service to update the task record.
+    """
+    # Get the updated task data from the request
+    updated_data = request.json
+    name = updated_data.get('name')
+    due_date = updated_data.get('dueDate')
+    time_to_do = updated_data.get('timeToDo')
+    work_days = updated_data.get('workDays')
+    weekends = updated_data.get('weekends')
+    work_time = updated_data.get('workTime')
+    
+    # Create a request payload to send to the planner service
+    planner_payload = {
+        "id": id,
+        "dueDate": due_date,
+        "workDays": work_days,
+        "weekends": weekends,
+        "timeToDo": time_to_do,
+        "workTime": work_time
+    }
+
+    # Send the request to the planner service to update the schedule
+    planner_response = requests.post(f"{PLANNER_SERVICE_URL}/{id}", json=planner_payload)
+
+    if planner_response.status_code != 200:
+        return jsonify({"error": "Failed to update task schedule"}), 500
+
+    # Create a request payload to update the task in the database service
+    database_payload = {
+        "id": id,
+        "name": name,
+        "dueDate": due_date,
+        "timeToDo": time_to_do,
+        "workDays": work_days,
+        "weekends": weekends,
+        "workTime": work_time
+    }
+
+    # Send the request to the database service to update the task record
+    db_response = requests.post(f"{DATABASE_SERVICE_URL}/{id}", json=database_payload)
+
+    if db_response.status_code != 200:
+        return jsonify({"error": "Failed to update task record"}), 500
+
+    return jsonify({"message": "Task updated successfully"}), 200
 
 
 if __name__ == "__main__":
