@@ -2,28 +2,13 @@ from flask import Flask, request, jsonify
 import requests
 from datetime import datetime, timedelta
 import json
-
+from scheduleCreator import calendarPlanner
 app = Flask(__name__)
 
 # Define the URL of the Database service and planner port
 DATABASE_SERVICE_URL = 'http://database_service:5002/save'
 PLANNER_SERVICE_PORT = 5001
-
-# Calculate schedule, how many hours a day and how many days to work on an assignment
-def calculate_schedule(date_created, due_date, total_time, work_days, include_weekends ):
-    days_of_week = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-    schedule = {}
-
-    time_per_day = total_time / work_days
-
-    current_date = date_created
-    while current_date <= due_date and work_days > 0:
-        if include_weekends or current_date.weekday() < 5: # Remove weekends
-            schedule[current_date.strftime("%Y-%m-%d")] = time_per_day
-            work_days -= 1
-        current_date+= timedelta(days=1)
-
-    return schedule
+schedule = {}
 
 @app.route('/update/<int:id>', methods=['POST'])
 def update_task(id):
@@ -45,7 +30,7 @@ def update_task(id):
         return jsonify({"error": f"Invalid due date format: {e}"}), 400
 
     # Calculate the schedule based on the provided data
-    schedule = calculate_schedule(datetime.today(), due_date, work_time, work_days, weekends)
+    schedule = calendarPlanner(due_date, work_days, weekends, work_time, 0, schedule)
 
     # Prepare the data for sending to the database service
     task_data = {
