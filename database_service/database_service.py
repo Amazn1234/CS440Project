@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, flash
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
-# refernce this file
+# reference this file
 app = Flask(__name__)
 # get db
 app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///todo.db"
@@ -23,3 +23,83 @@ class Todo(db.Model):
 
     def __repr__(self):
         return '<Task %r>' % self.id
+    
+# route for adding a task
+@app.route('/tasks', methods=['GET', 'POST'])
+def tasks():
+    errors = []
+
+    # if method is POST(adding a task)
+    if request.method == 'POST':
+        task_data = request.json
+
+        task_name = task_data['name']
+
+        try:
+            # get due date and time
+            task_dueDate = task_data['dueDate']
+            task_dueTime = task_data['dueTime']
+            # turn into a datetime object
+            task_dueDate = datetime.strptime(task_dueDate + " " + task_dueTime, "%Y-%m-%d %H:%M:%S")
+        # if failure to do so, send error
+        except:
+            errors.append("Error: Invalid date or time")
+            return {"errors": errors}, 400
+        
+        # get if user is willing to work weekends
+        # set checkbox response as boolean
+        task_weekends = bool(task_data['weekends'])
+        
+        task_timeToDo = int(task_data['timeToDo'])
+        
+        # get the days of the week to work
+        try:
+            task_workDays = int(task_data['workDays'])
+            # check if valid amount of days- if not, send error
+            if task_weekends:
+                if task_workDays > 7 or task_workDays <= 0:
+                    errors.append("Error: Please enter an amount of days 1-7")
+                    return {"errors": errors}, 400
+            else:
+                if task_workDays > 5 or task_workDays <= 0:
+                    errors.append("Error: Please enter an amount of days 1-5")
+                    return {"errors": errors}, 400
+        # if not an int, send error
+        except:
+            errors.append("Error: Please enter an integer")
+            return {"errors": errors}, 400
+        
+        # get how much time user can work per day
+        task_workTime = task_data['workTime']
+        # turn into a datetime object
+        try:
+            task_workTime = datetime.strptime(task_workTime, "%H")
+        # if failure to do so, send error
+        except:
+            errors.append("Error: Please enter a valid 2-digit hour amount")
+            return {"errors": errors}, 400
+        
+        # get the schedule added by the planner microservice
+        task_schedule = task_data["schedule"]
+        
+        new_task = Todo(name=task_name, dueDate=task_dueDate, workDays=task_workDays, timeToDo=task_timeToDo,
+                         weekends=task_weekends, workTime=task_workTime, schedule=task_schedule)
+        
+        # add task to db and commit
+        try:
+            db.session.add(new_task)
+            db.session.commit()
+            return {"message": "Task added successfully"}, 201
+        # if error encountered, return error
+        except Exception as e:
+            # rollback just to be safe
+            db.session.rollback()
+            # send an error back
+            return {"error": "Failed to add task", "details": str(e)}, 500
+    
+    # else is a GET request
+    else:
+        # query database for all tasks
+        tasks = Todo.query.order_by(Todo.date_created).all()
+        # send all tasks
+        return {"tasks": [task.__dict__ for task in tasks]}

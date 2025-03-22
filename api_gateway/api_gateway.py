@@ -23,10 +23,12 @@ def index():
 def add_task():
     # send data to task service
     task_data = {
-        "name": request.form['dueDate'] + " " + requests.form['dueTime'],
+        "name": request.form['name'],
+        "dueDate": request.form['dueDate'],
+        "dueTime": request.form['dueTime'],
+        "weekends": request.form.get('weekends') == "on",
         "timeToDo": int(request.form['timeToDo']),
         "workDays": int(request.form['workDays']),
-        "weekends": request.form.get('weekends') == "on",
         "workTime": request.form['workTime']
     }
 
