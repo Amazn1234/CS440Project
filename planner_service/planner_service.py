@@ -77,7 +77,7 @@ def create_task():
 
     # Convert dueDate from string to datetime
     try:
-        due_date = datetime.strptime(due_date, "%Y-%m-%d %H:%M:%S")
+        due_date = datetime.strptime(due_date, "%MM-%DD-%YYYY %H:%M:%S")
     except Exception as e:
         return jsonify({"error": f"Invalid due date format: {e}"}), 400
 
