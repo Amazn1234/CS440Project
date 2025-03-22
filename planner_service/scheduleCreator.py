@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 class Week:
     days = { "sunday": 0, "monday": 0, "tuesday": 0, "wednesday": 0, "thursday": 0, "friday": 0, "saturday": 0 }
 
-def calendarPlanner(dueDateTime, workDays, weekendWork, workHours, freeHours, planner):
+def calendarPlanner(dueDateTime, workDays, weekendWork, workHours, freeHours):
     # divide the estimated work hours by the days able to work
     maxHoursPerDay = workHours / (int((dueDateTime - datetime.now()).days) + 1)
     # variables that may be used if we implement checking the planner for full days or something similar
@@ -13,7 +13,7 @@ def calendarPlanner(dueDateTime, workDays, weekendWork, workHours, freeHours, pl
     weekList = []
     # initialize week count, used in case of tasks that span multiple weeks
     weekNumber = 0
-
+    planner = {}
     #for week in planner:
     #    # figure out a way to differentiate weeks
     #    schedList += task.schedule
@@ -70,3 +70,5 @@ def calendarPlanner(dueDateTime, workDays, weekendWork, workHours, freeHours, pl
                 
         # add a day to currentDay
         currentDay += timedelta(days=1)
+
+    return planner
