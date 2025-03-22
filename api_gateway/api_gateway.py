@@ -48,7 +48,7 @@ def add_task():
         return "Database service unavailable", 500 #return err and code 500
     return redirect('/')
 
-@app.route('/delete/<int:id>')
+@app.route('/delete/<int:id>', methods=['DELETE'])
 def delete_task(id):
     # delete a task, link to db service
     requests.delete(f"{DATABASE_SERVICE_URL}/tasks/{id}")
@@ -62,7 +62,7 @@ def update_task(id):
     and to the database service to update the task record.
     """
     # Get the updated task data from the request
-    updated_data = request.json()
+    updated_data = request.get_json()
     name = updated_data.get('name')
     due_date = updated_data.get('dueDate')
     time_to_do = updated_data.get('timeToDo')
