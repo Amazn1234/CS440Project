@@ -30,7 +30,7 @@ def update_task(id):
         return jsonify({"error": f"Invalid due date format: {e}"}), 400
 
     # Calculate the schedule based on the provided data
-    schedule = calendarPlanner(due_date, work_days, weekends, work_time, 0, schedule)
+    schedule = calendarPlanner(due_date, work_days, weekends, work_time, 0)
 
     # Prepare the data for sending to the database service
     task_data = {
