@@ -60,7 +60,7 @@ def update_task(id):
     and to the database service to update the task record.
     """
     # Get the updated task data from the request
-    updated_data = request.json
+    updated_data = request.json()
     name = updated_data.get('name')
     due_date = updated_data.get('dueDate')
     time_to_do = updated_data.get('timeToDo')
