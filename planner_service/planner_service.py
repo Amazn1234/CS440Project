@@ -1,25 +1,14 @@
 from flask import Flask, request, jsonify
 import requests
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
-
+from scheduleCreator import calendarPlanner
 app = Flask(__name__)
 
-# Define the URL of the Database service
+# Define the URL of the Database service and planner port
 DATABASE_SERVICE_URL = 'http://database_service:5002/save'
-
-# Planner logic - can be expanded based on the actual logic in your `planner.py`
-def calculate_schedule(due_date, work_days, weekends, time_to_do, work_time):
-    days_of_week = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-    planner = {}
-    
-    for i in range(work_days):
-        day = days_of_week[i % len(days_of_week)]
-        # For simplicity, here we assume work_time represents hours to work each day
-        planner[day] = {"work_time": work_time}
-        
-    # This is just an example - adjust your scheduling logic as needed
-    return planner
+PLANNER_SERVICE_PORT = 5001
+schedule = {}
 
 @app.route('/update/<int:id>', methods=['POST'])
 def update_task(id):
@@ -41,7 +30,7 @@ def update_task(id):
         return jsonify({"error": f"Invalid due date format: {e}"}), 400
 
     # Calculate the schedule based on the provided data
-    schedule = calculate_schedule(due_date, work_days, weekends, time_to_do, work_time)
+    schedule = calendarPlanner(due_date, work_days, weekends, work_time, 0)
 
     # Prepare the data for sending to the database service
     task_data = {
@@ -104,4 +93,4 @@ def create_task():
     return jsonify({"message": "Task created successfully"}), 201
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    app.run(debug=True, host='0.0.0.0', port=PLANNER_SERVICE_PORT)

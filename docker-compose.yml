@@ -21,11 +21,11 @@ services:
     ports:
       - "5002:5002" #verify correct port numbers
     volumes:
-     -db_data:/app/instance
+     - db_data:/database_service/instance/todo.db
     networks:
       - backend
 volumes:
-  -db_data
+  - db_data
 
 networks:
   backend:
