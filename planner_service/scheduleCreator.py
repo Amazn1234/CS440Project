@@ -13,33 +13,7 @@ def calendarPlanner(dueDateTime, workDays, weekendWork, workHours, freeHours):
     weekList = []
     # initialize week count, used in case of tasks that span multiple weeks
     weekNumber = 0
-    planner = {}
-    #for week in planner:
-    #    # figure out a way to differentiate weeks
-    #    schedList += task.schedule
-    
-    #for index in range(len(schedList) - 4):
-    #    day = schedList[index] + schedList[index + 1]
-    #    hours = schedList[index + 2] + schedList[index + 3]
-    #    hours = int(hours)
-    #    if day == "Su":
-    #        weekList.append(Week)
-    #        weekNumber += 1
-    #    match day:
-    #        case "Su":
-    #            weekList[weekNumber].days["sunday"] += hours
-    #        case "Mo":
-    #            weekList[weekNumber].days["monday"] += hours
-    #        case "Tu":
-    #            weekList[weekNumber].days["tuesday"] += hours
-    #        case "We":
-    #            weekList[weekNumber].days["wednesday"] += hours
-    #        case "Th":
-    #            weekList[weekNumber].days["thursday"] += hours
-    #        case "Fr":
-    #            weekList[weekNumber].days["friday"] += hours
-    #        case "Sa":
-    #            weekList[weekNumber].days["saturday"] += hours
+    planner = []
     
     # get today- currentDay will hold the day as we increment through the days
     currentDay = datetime.now()
