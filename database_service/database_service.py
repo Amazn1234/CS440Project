@@ -103,3 +103,52 @@ def tasks():
         tasks = Todo.query.order_by(Todo.date_created).all()
         # send all tasks
         return {"tasks": [task.__dict__ for task in tasks]}
+    
+# route for deleting a task
+@app.route('/tasks/<int:id>', methods=['DELETE'])
+def delete_task(id):
+    task_to_delete = Todo.query.get(id)
+
+    if not task_to_delete:
+        return {"error": "Task not found"}, 404
+
+    try:
+        db.session.delete(task_to_delete)
+        db.session.commit()
+        return {"message": "Task deleted successfully"}, 200
+    except Exception as e:
+        db.session.rollback()
+        return {"error": "Failed to delete task", "details": str(e)}, 500
+    
+# route for updating a task
+@app.route('/tasks/<int:id>', methods=['PUT'])
+def update_task(id):
+    task_to_update = Todo.query.get(id)
+
+    if not task_to_update:
+        return {"error": "Task not found"}, 404
+    
+    try:
+        task_data = request.json
+
+        if "name" in task_data:
+            task_to_update.name = task_data["name"]
+        if "dueDate" in task_data and "dueTime" in task_data:
+            task_to_update.dueDate = datetime.strptime(task_data["task_dueDate"] + " " + task_data["task_dueTime"], "%Y-%m-%d %H:%M:%S")
+        if "timeToDo" in task_data:
+            task_to_update.timeToDo = task_data["timeToDo"]
+        if "workDays" in task_data:
+            task_to_update.workDays = task_data["workDays"]
+        if "weekends" in task_data:
+            task_to_update.weekends = task_data["weekends"]
+        if "workTime" in task_data:
+            task_to_update.workTime = task_data["workTime"]
+        if "schedule" in task_data:
+            task_to_update.schedule = task_data["schedule"]
+        
+        db.session.commit()
+        return {"message": "Task updated successfully", "task": task_to_update.to_dict()}, 200
+    
+    except Exception as e:
+        db.session.rollback()
+        return {"error": "Failed to update task", "details": str(e)}, 500

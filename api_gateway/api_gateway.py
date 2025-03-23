@@ -98,7 +98,7 @@ def update_task(id):
     }
 
     # Send the request to the database service to update the task record
-    db_response = requests.post(f"{DATABASE_SERVICE_URL}/{id}", json=database_payload)
+    db_response = requests.put(f"{DATABASE_SERVICE_URL}/{id}", json=database_payload)
 
     if db_response.status_code != 200:
         return jsonify({"error": "Failed to update task record"}), 500
