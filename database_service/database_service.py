@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, flash
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+import json
 
 # reference this file
 app = Flask(__name__)
@@ -34,7 +35,7 @@ class Todo(db.Model):
             'workDays': self.workDays,
             'weekends': self.weekends,
             'workTime': self.workTime.isoformat(),  # Convert datetime to string
-            'schedule': self.schedule,
+            'schedule': json.loads(self.schedule) if self.schedule else {},
             'date_created': self.date_created
         }
     
@@ -104,7 +105,7 @@ def tasks():
         try:
             db.session.add(new_task)
             db.session.commit()
-            return {"message": "Task added successfully"}, 201
+            return {"task": new_task.to_dict()}, 201
         # if error encountered, return error
         except Exception as e:
             # rollback just to be safe

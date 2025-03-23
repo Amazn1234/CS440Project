@@ -6,7 +6,7 @@ from scheduleCreator import calendarPlanner
 app = Flask(__name__)
 
 # Define the URL of the Database service and planner port
-DATABASE_SERVICE_URL = 'http://database_service:5002/save'
+DATABASE_SERVICE_URL = 'http://database_service:5002'
 PLANNER_SERVICE_PORT = 5001
 schedule = {}
 
@@ -44,7 +44,7 @@ def update_task(id):
     }
 
     # Send the task data to the database service to save
-    response = requests.post(DATABASE_SERVICE_URL, json=task_data)
+    response = requests.post(DATABASE_SERVICE_URL + "/save", json=task_data)
 
     if response.status_code != 200:
         return jsonify({"error": "Failed to update task in the database"}), 500
@@ -71,7 +71,7 @@ def create_task():
         return jsonify({"error": f"Invalid due date format: {e}"}), 400
 
     # Calculate the schedule for the new task
-    schedule = calculate_schedule(due_date, work_days, weekends, time_to_do, work_time)
+    schedule = calendarPlanner(due_date, work_days, weekends, work_time, 0)
 
     # Prepare the task data
     task_data = {
@@ -85,7 +85,7 @@ def create_task():
     }
 
     # Send the new task data to the database service to save it
-    response = requests.post(DATABASE_SERVICE_URL, json=task_data)
+    response = requests.post(DATABASE_SERVICE_URL + "/save", json=task_data)
 
     if response.status_code != 200:
         return jsonify({"error": "Failed to create task in the database"}), 500
@@ -97,7 +97,7 @@ def get_schedule():
     """
     Endpoint to retrieve the schedule for all tasks from the database service.
     """
-    response = requests.get('http://database_service:5002/tasks')
+    response = requests.get(DATABASE_SERVICE_URL + '/tasks')
 
     if response.status_code != 200:
         return jsonify({"error": "Failed to retrieve tasks from the database"}), 500
