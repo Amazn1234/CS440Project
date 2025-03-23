@@ -16,9 +16,9 @@ class Week:
     def to_dict(self):
         return self.days
 
-def calendarPlanner(dueDateTime, workDays = 1, weekendWork = False, workHours = 0, freeHours = 1):
+def calendarPlanner(dueDate, workDays = 1, weekendWork = False, workHours = 0):
     # divide the estimated work hours by the days able to work
-    maxHoursPerDay = workHours / (int((dueDateTime - datetime.now()).days) + 1)
+    maxHoursPerDay = workHours / (int((dueDate - datetime.now()).days) + 1)
     # variables that may be used if we implement checking the planner for full days or something similar
     # schedList = ""
     # weekList = []
@@ -30,7 +30,7 @@ def calendarPlanner(dueDateTime, workDays = 1, weekendWork = False, workHours = 
     # get today- currentDay will hold the day as we increment through the days
     currentDay = datetime.now()
     # for days in between now and due date day
-    for dayIndex in range(int((dueDateTime - datetime.now()).days) + 1):
+    for dayIndex in range(int((dueDate - datetime.now()).days) + 1):
 
         day_name = currentDay.strftime("%A").lower() # day name
         if day_name in planner[weekNumber].days: #if valud day
@@ -43,7 +43,7 @@ def calendarPlanner(dueDateTime, workDays = 1, weekendWork = False, workHours = 
         # increment current day
         currentDay += timedelta(days=1)
     
-    return json.dumps([week.to_dict() for week in planner], indent = 2)
+    return [week.to_dict() for week in planner]
 """
         # get the day of the week, add the time to the day
         match (currentDay.weekday()):

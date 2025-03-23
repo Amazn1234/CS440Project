@@ -3,11 +3,14 @@ import requests
 from datetime import datetime, timedelta
 import json
 from scheduleCreator import calendarPlanner
+import logging
+
 app = Flask(__name__)
 
 # Define the URL of the Database service and planner port
 DATABASE_SERVICE_URL = 'http://database_service:5002'
 PLANNER_SERVICE_PORT = 5001
+API_GATEWAY_URL = 'http://api_gateway_service:5000'
 schedule = {}
 
 @app.route('/update/<int:id>', methods=['POST'])
@@ -16,7 +19,7 @@ def update_task(id):
     Endpoint to update a task's schedule.
     Receives task data, calculates the schedule, and sends the updated task to the database service.
     """
-    data = request.json()
+    data = request.get_json()
     due_date = data.get('dueDate')
     work_days = data.get('workDays')
     weekends = data.get('weekends')
@@ -56,9 +59,11 @@ def create_task():
     # Endpoint to create a new task, calculate the schedule, and save it to the database service.
 
     # get task data from api_gateway
-    data = request.json
+    data = request.get_json()
+    app.logger.debug("recieved data as :%s \n", data)
     name = data.get('name')
     due_date = data.get('dueDate')
+    due_time = data.get('dueTime')
     work_days = data.get('workDays')
     weekends = data.get('weekends')
     time_to_do = data.get('timeToDo')
@@ -66,12 +71,14 @@ def create_task():
 
     # Convert dueDate from string to datetime
     try:
-        due_date = datetime.strptime(due_date, "%MM-%DD-%YYYY %H:%M:%S")
+        due_date = datetime.strptime(due_date, "%Y-%m-%d")
+        due_time = datetime.strptime(due_time, "%H:%M:%S").time() # Convert to datetime
     except Exception as e:
+        app.logger.error("Error parsing due_date or due_time: %s\n", e)
         return jsonify({"error": f"Invalid due date format: {e}"}), 400
 
     # Calculate the schedule for the new task
-    schedule = calendarPlanner(due_date, work_days, weekends, work_time, 0)
+    schedule = calendarPlanner(due_date, work_days, weekends, work_time)
 
     # Prepare the task data
     task_data = {
@@ -79,31 +86,50 @@ def create_task():
         "dueDate": due_date,
         "workDays": work_days,
         "weekends": weekends,
+        "dueTime": due_time,
         "timeToDo": time_to_do,
         "workTime": work_time,
-        "schedule": json.dumps(schedule)  # Convert schedule to a JSON string
+        "schedule": schedule
     }
 
     # Send the new task data to the database service to save it
-    response = requests.post(DATABASE_SERVICE_URL + "/save", json=task_data)
+    # response = requests.post(API_GATEWAY_URL + "/add", json=task_data)
 
-    if response.status_code != 200:
-        return jsonify({"error": "Failed to create task in the database"}), 500
+    # if response.status_code != 200:
+        # return jsonify({"error": "Failed to create task in the database"}), 500
 
-    return jsonify({"message": "Task created successfully"}), 201
+    return jsonify(task_data)
 
-@app.route('/schedule', methods=['GET'])
+
+@app.route('/schedule', methods=['GET', 'POST'])
 def get_schedule():
-    """
-    Endpoint to retrieve the schedule for all tasks from the database service.
-    """
-    response = requests.get(DATABASE_SERVICE_URL + '/tasks')
+    # Endpoint to retrieve the schedule for all tasks from the database service.
 
-    if response.status_code != 200:
-        return jsonify({"error": "Failed to retrieve tasks from the database"}), 500
+    if request.method == 'GET':
+        response = requests.get(DATABASE_SERVICE_URL + '/tasks')
 
-    tasks = response.json().get("tasks", [])
-    return jsonify({"schedule": tasks}), 200
+        if response.status_code != 200:
+            return jsonify({"error": "Failed to retrieve tasks from the database"}), 500
+
+        tasks = response.json().get("tasks", [])
+        return jsonify({"schedule": tasks}), 200
+    else:
+        create_task()
+        # get task data
+        data = request.json()
+        name = data.get('name')
+        due_date = data.get('dueDate')
+        work_days = data.get('workDays')
+        weekends = data.get('weekends')
+        time_to_do = data.get('timeToDo')
+        work_time = data.get('workTime')
+
+        # create schedule
+        schedule = calendarPlanner(due_date, work_days, weekends, work_time)
+
+        print("type of schedule is: " + type(schedule))
+        # send to api_gateway before being sent to db
+        return schedule
 
 
 if __name__ == '__main__':

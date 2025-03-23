@@ -36,8 +36,9 @@ def add_task():
 
     # call planner service to gen a schedule
     try:
-        schedule_response = requests.post(f"{PLANNER_SERVICE_URL}/schedule", json=task_data)
-        task_data["schedule"] = schedule_response.json()["schedule"]
+        schedule_response = requests.post(f"{PLANNER_SERVICE_URL}/create", json=task_data)
+        schedule_data = schedule_response.json()
+        task_data["schedule"] = schedule_data.get("schedule")
     except requests.exceptions.RequestException:
         task_data["schedule"] = "Error getting schedule"
 

@@ -35,7 +35,7 @@ class Todo(db.Model):
             'workDays': self.workDays,
             'weekends': self.weekends,
             'workTime': self.workTime.isoformat(),  # Convert datetime to string
-            'schedule': json.loads(self.schedule) if self.schedule and self.schedule.strip() else {},  # Ensure valid JSON string
+            'schedule': self.schedule,
             'date_created': self.date_created
         }
     
