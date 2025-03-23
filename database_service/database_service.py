@@ -24,6 +24,21 @@ class Todo(db.Model):
     def __repr__(self):
         return '<Task %r>' % self.id
     
+    '''
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'dueDate': self.dueDate.isoformat(),  # Convert datetime to string
+            'timeToDo': self.timeToDo,
+            'workDays': self.workDays,
+            'weekends': self.weekends,
+            'workTime': self.workTime.isoformat(),  # Convert datetime to string
+            'schedule': self.schedule,
+            'date_created': self.date_created
+        }
+    '''
+    
 # route for adding a task
 @app.route('/tasks', methods=['GET', 'POST'])
 def tasks():
@@ -101,21 +116,26 @@ def tasks():
     else:
         # query database for all tasks
         tasks = Todo.query.order_by(Todo.date_created).all()
-        # send all tasks
-        return {"tasks": [task.__dict__ for task in tasks]}
+        # convert tasks to a list of dictionaries
+        return {"tasks": [task.to_dict() for task in tasks]}
     
 # route for deleting a task
 @app.route('/tasks/<int:id>', methods=['DELETE'])
 def delete_task(id):
+    # get the task to delete by id
     task_to_delete = Todo.query.get(id)
 
+    # if nothing found, return an error
     if not task_to_delete:
         return {"error": "Task not found"}, 404
 
+    # try to commit the deletion to the db
     try:
         db.session.delete(task_to_delete)
         db.session.commit()
+        # return a success message
         return {"message": "Task deleted successfully"}, 200
+    # otherwise, rollback changes and return an error
     except Exception as e:
         db.session.rollback()
         return {"error": "Failed to delete task", "details": str(e)}, 500
@@ -123,14 +143,20 @@ def delete_task(id):
 # route for updating a task
 @app.route('/tasks/<int:id>', methods=['PUT'])
 def update_task(id):
+    # get the task to update by id
     task_to_update = Todo.query.get(id)
 
+    # if task not found, return an error
     if not task_to_update:
         return {"error": "Task not found"}, 404
     
+    # try to update task
     try:
+        # get the stream of json data
         task_data = request.json
 
+        # check if an attribute is being updated, if so, update the original task with the
+        # new value
         if "name" in task_data:
             task_to_update.name = task_data["name"]
         if "dueDate" in task_data and "dueTime" in task_data:
@@ -146,9 +172,17 @@ def update_task(id):
         if "schedule" in task_data:
             task_to_update.schedule = task_data["schedule"]
         
+        # commit the changes
         db.session.commit()
+        # return a success message
         return {"message": "Task updated successfully", "task": task_to_update.to_dict()}, 200
     
+    # if an error occurs
     except Exception as e:
+        # rollback changes and return an error
         db.session.rollback()
         return {"error": "Failed to update task", "details": str(e)}, 500
+
+# run the service
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5002, debug=True)
