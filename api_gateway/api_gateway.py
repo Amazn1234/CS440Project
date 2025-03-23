@@ -28,7 +28,7 @@ def add_task():
         "dueTime": request.form['dueTime'],
         "weekends": request.form.get('weekends') == "on",
         "timeToDo": int(request.form['timeToDo']),
-        "workDays": int(request.form['workDays']),
+        "workDays": int(request.form.get('workDays', 0)),
         "workTime": request.form['workTime']
     }
 

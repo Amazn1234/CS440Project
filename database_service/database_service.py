@@ -24,7 +24,7 @@ class Todo(db.Model):
     def __repr__(self):
         return '<Task %r>' % self.id
     
-    '''
+    
     def to_dict(self):
         return {
             'id': self.id,
@@ -37,7 +37,7 @@ class Todo(db.Model):
             'schedule': self.schedule,
             'date_created': self.date_created
         }
-    '''
+    
     
 # route for adding a task
 @app.route('/tasks', methods=['GET', 'POST'])

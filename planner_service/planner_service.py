@@ -92,5 +92,19 @@ def create_task():
 
     return jsonify({"message": "Task created successfully"}), 201
 
+@app.route('/schedule', methods=['GET'])
+def get_schedule():
+    """
+    Endpoint to retrieve the schedule for all tasks from the database service.
+    """
+    response = requests.get('http://database_service:5002/tasks')
+
+    if response.status_code != 200:
+        return jsonify({"error": "Failed to retrieve tasks from the database"}), 500
+
+    tasks = response.json().get("tasks", [])
+    return jsonify({"schedule": tasks}), 200
+
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=PLANNER_SERVICE_PORT)
