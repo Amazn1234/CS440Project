@@ -5,7 +5,7 @@ import json
 # week and it's days class
 class Week:
     def __init__(self):
-        days = { "sunday": 0, 
+        self.days = { "sunday": 0, 
                 "monday": 0, 
                 "tuesday": 0, 
                 "wednesday": 0, 
@@ -14,10 +14,11 @@ class Week:
                 "saturday": 0 
                 }
     def to_dict(self):
-        return self.days
+        return {day: time.strftime("%H:%M:%S") for day, time in self.days.items()}
 
 def calendarPlanner(dueDate, workDays = 1, weekendWork = False, workHours = 0):
     # divide the estimated work hours by the days able to work
+    workHours = int(workHours)
     maxHoursPerDay = workHours / (int((dueDate - datetime.now()).days) + 1)
     # variables that may be used if we implement checking the planner for full days or something similar
     # schedList = ""
