@@ -1,52 +1,30 @@
-from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 
-# week and it's days class
+# Week class - stores daily scheduled hours for a single week
 class Week:
-    days = { "sunday": 0, "monday": 0, "tuesday": 0, "wednesday": 0, "thursday": 0, "friday": 0, "saturday": 0 }
+    def __init__(self):
+        # Initialize dictionary for each day of the week, starting with 0 hours
+        self.days = {
+            "sunday": 0, "monday": 0, "tuesday": 0,
+            "wednesday": 0, "thursday": 0,
+            "friday": 0, "saturday": 0
+        }
 
+# Main schedule creation function
 def calendarPlanner(dueDateTime, workDays, weekendWork, workHours, freeHours, planner):
-    # divide the estimated work hours by the days able to work
+    # Divide the estimated work hours by the number of days available
     maxHoursPerDay = workHours / (int((dueDateTime - datetime.now()).days) + 1)
-    # variables that may be used if we implement checking the planner for full days or something like it
-    schedList = ""
-    weekList = []
-    # initialize week count, used in case of tasks that span multiple weeks
+
+    # Initialize current working week number
     weekNumber = 0
 
-    #for week in planner:
-    #    # figure out a way to differentiate weeks
-    #    schedList += task.schedule
-    
-    #for index in range(len(schedList) - 4):
-    #    day = schedList[index] + schedList[index + 1]
-    #    hours = schedList[index + 2] + schedList[index + 3]
-    #    hours = int(hours)
-    #    if day == "Su":
-    #        weekList.append(Week)
-    #        weekNumber += 1
-    #    match day:
-    #        case "Su":
-    #            weekList[weekNumber].days["sunday"] += hours
-    #        case "Mo":
-    #            weekList[weekNumber].days["monday"] += hours
-    #        case "Tu":
-    #            weekList[weekNumber].days["tuesday"] += hours
-    #        case "We":
-    #            weekList[weekNumber].days["wednesday"] += hours
-    #        case "Th":
-    #            weekList[weekNumber].days["thursday"] += hours
-    #        case "Fr":
-    #            weekList[weekNumber].days["friday"] += hours
-    #        case "Sa":
-    #            weekList[weekNumber].days["saturday"] += hours
-    
-    # get today- currentDay will hold the day as we increment through the days
+    # Get today's date to start scheduling from
     currentDay = datetime.now()
-    # for days in between now and due date day
+
+    # Loop through each day between now and the due date
     for dayIndex in range(int((dueDateTime - datetime.now()).days) + 1):
-        # get the day of the week, add the time to the day
-        match (currentDay.weekday()):
+        # Based on current day of the week, add hours to the correct day
+        match currentDay.weekday():
             case 0:
                 planner[weekNumber].days["monday"] += maxHoursPerDay
             case 1:
@@ -62,11 +40,14 @@ def calendarPlanner(dueDateTime, workDays, weekendWork, workHours, freeHours, pl
             case 6:
                 planner[weekNumber].days["sunday"] += maxHoursPerDay
 
-        # if a new week is coming, change weeks and add a week to planner if needed
-        if (currentDay.weekday()) == 5:
+        # If Saturday, move to next week
+        if currentDay.weekday() == 5:
             weekNumber += 1
+            # Add a new Week object if planner doesn't have enough weeks
             if len(planner) < weekNumber + 1:
-                planner.append(Week)
-                
-        # add a day to currentDay
+                planner.append(Week())
+
+        # Move current day to the next day
         currentDay += timedelta(days=1)
+
+    # No explicit return needed because planner is modified directly
