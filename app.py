@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, flash
 from datetime import datetime
-from services.database_service import db, Todo  # Import database service
-from services.planner_service import calendarPlanner, Week  # Import planner service
+from services.databaseService import db, Todo  # Import database service
+from services.plannerService import calendarPlanner, Week  # Import planner service
 
 # Create Flask app
 app = Flask(__name__)
